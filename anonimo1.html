@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fondo Animado: Máscara de Anonymous en Matrix</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        #matrixCanvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        #anonymousMaskContainer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        #anonymousMask {
+            display: block;
+            max-width: 50vw;
+            max-height: 80vh;
+            width: 100%;
+            height: auto;
+            opacity: 1;
+            filter: invert(1) sepia(1) hue-rotate(60deg) saturate(6) brightness(0.6) contrast(2);
+            animation: greenGlow 2.5s ease-in-out infinite alternate;
+            pointer-events: none;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(.17,.67,.83,.67);
+            transform-style: preserve-3d;
+        }
+        @keyframes greenGlow {
+            0% {
+                filter: invert(1) sepia(1) hue-rotate(60deg) saturate(6) brightness(0.6) contrast(2);
+            }
+            100% {
+                filter: invert(1) sepia(1) hue-rotate(60deg) saturate(8) brightness(1.1) contrast(2.2);
+            }
+        }
+        #matrixFooter {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100vw;
+            text-align: center;
+            font-family: 'Orbitron', 'monospace', 'Courier New', Courier, monospace;
+            font-size: 2.2vw;
+            color: #0F0;
+            text-shadow: 0 0 8px #0F0, 0 0 16px #0F0;
+            letter-spacing: 0.2em;
+            padding: 1vw 0 2vw 0;
+            z-index: 10;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <div id="anonymousMaskContainer">
+        <img src="anonymous_mask.png" alt="Máscara Anonymous" id="anonymousMask" />
+    </div>
+    <div id="matrixFooter">SOMOS ANONIMOS JAMÁS OLVIDAMOS ESPÉRANOS</div>
+    <script>
+        // Matrix efecto
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+        const matrixChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",.<>/?`~";
+        const katakana = "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズヅブプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+        const mixedChars = matrixChars + katakana;
+        const fontSize = 14;
+        let columns = Math.floor(width / fontSize);
+        let drops = [];
+        for (let i = 0; i < columns; i++) drops[i] = 1;
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = Math.floor(width / fontSize);
+            drops = [];
+            for (let i = 0; i < columns; i++) drops[i] = 1;
+        });
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px monospace`;
+            for (let i = 0; i < drops.length; i++) {
+                const text = mixedChars.charAt(Math.floor(Math.random() * mixedChars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        function animate() { drawMatrix(); }
+        setInterval(animate, 60);
+
+        // Rotación 3D con el mouse
+        const maskImgEl = document.getElementById('anonymousMask');
+        maskImgEl.style.display = 'block';
+        maskImgEl.style.opacity = '1';
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const deltaX = (x - centerX) / centerX;
+            const deltaY = (y - centerY) / centerY;
+            const rotateY = deltaX * 20;
+            const rotateX = -deltaY * 20;
+            maskImgEl.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+    </script>
+</body>
+</html>
